@@ -174,6 +174,23 @@ minikube delete
 ---
 
 # 🖥️ Multi-Node Configuration
+First ensure that your docker desktop is running. In kind one docker container is one node in kubernetes.
+
+First practice basic commands:
+
+```bash
+
+kind create cluster --name my-cluster     # Create a cluster (default: single-node)
+                                         # To create multi-node cluster, use config file
+
+kind get clusters                        # List all existing clusters
+
+kind delete cluster --name my-cluster    # Delete a specific cluster
+
+kubectl get nodes                        # View cluster nodes
+```
+
+---
 
 Create file: `kind-multinode.yaml`
 
