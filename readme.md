@@ -1,25 +1,75 @@
-docs: https://kind.sigs.k8s.io/docs/user/quick-start/
+# Kubernetes Hands-On (Minikube + kind)
 
-https://raw.githubusercontent.com/kubernetes-sigs/kind/main/site/content/docs/user/kind-example-config.yaml
+## 📌 Introduction
 
-# commands:
+This repository demonstrates my hands-on learning of **Kubernetes** using:
 
-## install kind
-brew install kind
+- Minikube (Local single-node cluster)
+- kind (Kubernetes in Docker)
 
-## create a single node cluster
-kind create cluster --name my-first-kind
-kubectl cluster-info --context kind-my-first-kind
+Kubernetes is a container orchestration platform used to deploy, manage, scale, and monitor containerized applications.
 
-## delete the cluster
-kind delete cluster --name my-first-kind
+---
 
-## create a cluster with 1 control plane and 2 worker nodes
-kind create cluster --name my-first-kind --config config.yaml
+## ❓ Why We Need Kubernetes
 
-## list the clusters
-kind get clusters
+Docker can run containers, but in production we need:
 
-# switch the context
+- Automatic scaling
+- Self-healing (restart failed containers)
+- Load balancing
+- Rolling updates
+- Service discovery
+- Multi-node cluster management
 
-kubectl config use-context kind-first-cluster
+Kubernetes solves all these problems.
+
+---
+
+# 🛠 Tools Used
+
+## 1️⃣ Minikube
+
+Minikube runs a single-node Kubernetes cluster locally.
+
+### Advantages
+- Beginner friendly
+- Built-in dashboard
+- Easy service access
+- Supports VM & Docker drivers
+
+---
+
+## 2️⃣ kind (Kubernetes in Docker)
+
+kind runs Kubernetes clusters inside Docker containers.
+
+### Advantages
+- Very lightweight
+- Fast cluster creation
+- Ideal for CI/CD
+- Can simulate multi-node clusters
+
+---
+
+# 🧱 Basic Kubernetes Architecture (Simple)
+
+Cluster = Control Plane + Worker Node(s)
+
+Main Components:
+
+- Node → Machine that runs Pods
+- Pod → Smallest deployable unit
+- Deployment → Manages multiple Pods
+- Service → Exposes Pods to network
+
+---
+
+# 🚀 COMPLETE WORKFLOW — MINIKUBE
+
+---
+
+## Step 1: Start Cluster
+
+```bash
+minikube start
