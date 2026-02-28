@@ -1,75 +1,342 @@
-# Kubernetes Hands-On (Minikube + kind)
+# 🚀 Kubernetes Hands-On Lab (Minikube + kind)
 
-## 📌 Introduction
-
-This repository demonstrates my hands-on learning of **Kubernetes** using:
-
-- Minikube (Local single-node cluster)
-- kind (Kubernetes in Docker)
-
-Kubernetes is a container orchestration platform used to deploy, manage, scale, and monitor containerized applications.
+> Practical Kubernetes implementation covering Pods, Deployments, Services, Scaling, Rolling Updates, and Multi-Node Cluster simulation.
 
 ---
 
-## ❓ Why We Need Kubernetes
+## 📌 Project Overview
 
-Docker can run containers, but in production we need:
+This repository demonstrates hands-on Kubernetes implementation using:
 
-- Automatic scaling
-- Self-healing (restart failed containers)
-- Load balancing
+- 🔹 Minikube (Single-node cluster)
+- 🔹 kind (Multi-node cluster using Docker)
+
+This project covers:
+
+- Cluster setup
+- Node management
+- Pod lifecycle
+- Deployments
+- Services
+- Scaling
 - Rolling updates
+- Imperative vs Declarative resource creation
+
+---
+
+## ❓ Why Kubernetes?
+
+Docker runs containers.  
+Kubernetes manages containers at scale.
+
+Kubernetes provides:
+
+- Automatic scheduling
+- Self-healing
+- Horizontal scaling
+- Rolling updates & rollbacks
 - Service discovery
+- Load balancing
 - Multi-node cluster management
 
-Kubernetes solves all these problems.
+---
+
+# 🏗️ Basic Kubernetes Architecture (Implemented Here)
+
+Cluster = Control Plane + Worker Node(s)
+
+Core Components Demonstrated:
+
+- Node → Machine running workloads
+- Pod → Smallest deployable unit
+- Deployment → Manages replicas
+- Service → Network abstraction layer
 
 ---
 
 # 🛠 Tools Used
 
-## 1️⃣ Minikube
-
-Minikube runs a single-node Kubernetes cluster locally.
-
-### Advantages
-- Beginner friendly
-- Built-in dashboard
-- Easy service access
-- Supports VM & Docker drivers
+| Tool | Purpose |
+|------|----------|
+| kubectl | CLI to interact with cluster |
+| Minikube | Single-node local cluster |
+| kind | Multi-node Kubernetes in Docker |
+| Docker | Container runtime |
 
 ---
 
-## 2️⃣ kind (Kubernetes in Docker)
+# 📂 Repository Structure
 
-kind runs Kubernetes clusters inside Docker containers.
-
-### Advantages
-- Very lightweight
-- Fast cluster creation
-- Ideal for CI/CD
-- Can simulate multi-node clusters
-
----
-
-# 🧱 Basic Kubernetes Architecture (Simple)
-
-Cluster = Control Plane + Worker Node(s)
-
-Main Components:
-
-- Node → Machine that runs Pods
-- Pod → Smallest deployable unit
-- Deployment → Manages multiple Pods
-- Service → Exposes Pods to network
+```
+.
+├── pod.yaml
+├── pod2.yaml
+├── deploy.yaml
+├── config.yaml
+├── kind-multinode.yaml
+└── README.md
+```
 
 ---
 
-# 🚀 COMPLETE WORKFLOW — MINIKUBE
-
----
+# 🚀 1️⃣ Minikube Workflow (Single Node)
 
 ## Step 1: Start Cluster
 
 ```bash
 minikube start
+```
+
+Verify:
+
+```bash
+kubectl cluster-info
+kubectl get nodes
+```
+
+Expected Output:
+
+```
+minikube   Ready   control-plane
+```
+
+---
+
+## Step 2: Imperative Pod Creation
+
+```bash
+kubectl run nginx --image=nginx --port=80
+kubectl get pods
+```
+
+Expose Pod:
+
+```bash
+kubectl expose pod nginx --type=NodePort --port=80
+minikube service nginx --url
+```
+
+---
+
+## Step 3: Declarative Deployment
+
+Apply YAML:
+
+```bash
+kubectl apply -f deploy.yaml
+```
+
+Check Resources:
+
+```bash
+kubectl get deployments
+kubectl get pods
+kubectl get svc
+```
+
+---
+
+## Step 4: Scale Deployment
+
+```bash
+kubectl scale deployment/nginx-deploy --replicas=3
+```
+
+---
+
+## Step 5: Rolling Update
+
+```bash
+kubectl set image deployment/nginx-deploy nginx=nginx:1.19
+kubectl rollout status deployment/nginx-deploy
+```
+
+---
+
+## Cleanup
+
+```bash
+kubectl delete -f deploy.yaml
+minikube delete
+```
+
+---
+
+# 🚀 2️⃣ kind Workflow (Multi-Node Cluster)
+
+## Why kind?
+
+- Lightweight
+- Fast cluster setup
+- Simulates production-like multi-node architecture
+- CI/CD friendly
+
+---
+
+# 🖥️ Multi-Node Configuration
+
+Create file: `kind-multinode.yaml`
+
+```yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+  - role: worker
+  - role: worker
+```
+
+---
+
+## Create Multi-Node Cluster
+
+```bash
+kind create cluster --name multi --config kind-multinode.yaml
+```
+
+Verify:
+
+```bash
+kubectl get nodes
+```
+
+Expected Output:
+
+```
+multi-control-plane   Ready
+multi-worker          Ready
+multi-worker2         Ready
+```
+
+---
+
+## Deploy Application
+
+```bash
+kubectl apply -f deploy.yaml
+kubectl get pods -o wide
+```
+
+Pods will be distributed across worker nodes.
+
+---
+
+## Port Forward
+
+```bash
+kubectl port-forward svc/nginx-svc 8080:80
+```
+
+Access:
+
+```
+http://localhost:8080
+```
+
+---
+
+## Delete Cluster
+
+```bash
+kind delete cluster --name multi
+```
+
+---
+
+# 📜 Example Deployment File (deploy.yaml)
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.21
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+spec:
+  selector:
+    app: nginx
+  ports:
+    - port: 80
+      targetPort: 80
+  type: NodePort
+```
+
+---
+
+# 🔎 Essential kubectl Commands
+
+```bash
+kubectl get nodes
+kubectl get pods
+kubectl get deployments
+kubectl get svc
+kubectl describe pod <pod-name>
+kubectl logs <pod-name>
+kubectl exec -it <pod-name> -- /bin/sh
+kubectl apply -f file.yaml
+kubectl delete -f file.yaml
+kubectl scale deployment/<name> --replicas=N
+kubectl rollout status deployment/<name>
+kubectl port-forward svc/<name> 8080:80
+```
+
+---
+
+# 📊 What This Project Demonstrates
+
+- Cluster creation (Minikube & kind)
+- Multi-node architecture simulation
+- Pod lifecycle management
+- Deployment strategies
+- Service networking
+- Horizontal scaling
+- Rolling updates
+- Imperative & Declarative workflows
+
+---
+
+# 🎯 Skills Demonstrated
+
+- Kubernetes fundamentals
+- Multi-node cluster configuration
+- YAML-based infrastructure
+- Container orchestration
+- Service exposure techniques
+- Deployment management
+- CLI-based troubleshooting
+
+---
+
+# 📌 Future Improvements
+
+- Ingress Controller
+- ConfigMaps & Secrets
+- Persistent Volumes
+- Helm integration
+- CI/CD pipeline using kind
+
+---
+
+# 👨‍💻 Author
+
+**Aqeel Saeed**  
+BS Software Engineering  
+Cloud & Containerization Enthusiast
